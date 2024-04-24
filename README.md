@@ -1,4 +1,4 @@
-## Physically Informed MEural Network (PINN)
+## Physically Informed Neural Network (PINN)
 
 Here's the complete example of how you could use TensorFlow to solve the system of differential equations $$\frac{dx}{dt} = x*y$$ and $$\frac{dy}{dt} = x^2$$ with a PINN using classes and advanced features of Python.
 
