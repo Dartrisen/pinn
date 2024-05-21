@@ -27,3 +27,17 @@ class Network(nn.Module):
 def f(model: Network, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
     """Compute the value of the approximate solution from the NN model"""
     return model(x, t)
+
+
+def grad(output: torch.Tensor, input: torch.Tensor, order: int = 1) -> torch.Tensor:
+    """Computes the partial derivative of an output with respect to an input."""
+    f_grad = output
+    for _ in range(order):
+        f_grad = torch.autograd.grad(
+            f_grad,
+            input,
+            grad_outputs=torch.ones_like(input),
+            create_graph=True,
+            retain_graph=True,
+        )[0]
+    return f_grad
