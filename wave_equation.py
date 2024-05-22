@@ -1,4 +1,8 @@
+from typing import Callable
+
+import matplotlib.pyplot as plt
 import torch
+from matplotlib.animation import FuncAnimation
 from torch import nn
 
 
@@ -41,3 +45,17 @@ def grad(output: torch.Tensor, input: torch.Tensor, order: int = 1) -> torch.Ten
             retain_graph=True,
         )[0]
     return f_grad
+
+
+def loss_fn(model: Network, x: torch.Tensor, t: torch.Tensor):
+    x.requires_grad_(True)
+    t.requires_grad_(True)
+    u = model(x, t)
+
+    # Compute the residual of the wave equation
+    residual = grad(u, t) - grad(u, x)
+
+    # Compute the loss as the mean squared residual
+    loss = torch.mean(residual ** 2)
+
+    return loss
