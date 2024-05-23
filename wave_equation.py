@@ -59,3 +59,27 @@ def loss_fn(model: Network, x: torch.Tensor, t: torch.Tensor):
     loss = torch.mean(residual ** 2)
 
     return loss
+
+
+def train_model(
+        model: Network,
+        loss_fn: Callable,
+        learning_rate: int = 0.01,
+        max_epochs: int = 1_000
+) -> Network:
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    for epoch in range(max_epochs):
+        try:
+            loss: torch.Tensor = loss_fn(model)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            if epoch % 1000 == 0:
+                print(f"Epoch: {epoch} - Loss: {float(loss):>7f}")
+
+        except KeyboardInterrupt:
+            break
+
+    return model
