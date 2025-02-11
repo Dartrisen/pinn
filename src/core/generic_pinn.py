@@ -7,26 +7,29 @@ import torch
 
 class GenericPINNSolver:
     def __init__(self,
-                 model,  # The neural network model (torch.nn.Module)
-                 pde_residual_func,  # Function to compute PDE residual loss
-                 bc_loss_func,  # Function to compute boundary condition loss
-                 ic_loss_func=None,  # Optional: function to compute initial condition loss
-                 collocation_points=None,  # Tensor of collocation points for PDE residual
-                 bc_points=None,  # Tensor of boundary points (or a list/dict as needed)
-                 ic_points=None,  # Tensor of initial condition points (if needed)
+                 model,
+                 pde_residual_func,
+                 bc_loss_func,
+                 ic_loss_func=None,
+                 collocation_points=None,
+                 bc_points=None,
+                 ic_points=None,
                  device=None):
         """
         Generic PINN solver.
 
-        Parameters:
-          model: PyTorch neural network model.
-          pde_residual_func: function(model, collocation_points) -> residual tensor.
-          bc_loss_func: function(model, bc_points) -> scalar boundary loss.
-          ic_loss_func: (optional) function(model, ic_points) -> scalar initial loss.
-          collocation_points: Tensor of points for PDE residual evaluation.
-          bc_points: Tensor (or dictionary) of points for boundary conditions.
-          ic_points: Tensor of points for initial conditions.
-          device: torch.device to run computations.
+        Args:
+            model: torch.nn.Module, the neural network model.
+            pde_residual_func: function(model, collocation_points) -> torch.Tensor,
+                           computes PDE residual loss.
+            bc_loss_func: function(model, bc_points) -> torch.Tensor,
+                          computes boundary condition loss.
+            ic_loss_func: (optional) function(model, ic_points) -> torch.Tensor,
+                          computes initial condition loss.
+            collocation_points: torch.Tensor, points for evaluating PDE residual.
+            bc_points: torch.Tensor, points for enforcing boundary conditions.
+            ic_points: torch.Tensor, points for enforcing initial conditions.
+            device: torch.device.
         """
         self.device = device if device is not None else torch.device('cpu')
         self.model = model.to(self.device)
@@ -40,13 +43,19 @@ class GenericPINNSolver:
     def train(self,
               epochs,
               optimizer,
-              loss_weights,  # Dictionary for weights e.g. {'pde':1.0, 'bc':10.0, 'ic':1.0}
+              loss_weights,
               log_interval=100):
         """
         Train the PINN.
 
+        Args:
+            epochs:
+            optimizer:
+            loss_weights: Dictionary for weights e.g. {'pde':1.0, 'bc':10.0, 'ic':1.0}
+            log_interval:
+
         Returns:
-          loss_history: list of total loss values logged.
+            loss_history: list of total loss values logged.
         """
         loss_history = []
         for epoch in range(epochs):
