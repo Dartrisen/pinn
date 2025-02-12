@@ -1,15 +1,78 @@
-# src/models/basic_net.py
+# src/models/base_model.py
+import torch
 import torch.nn as nn
 
 
-class FullyConnectedNet(nn.Module):
-    def __init__(self, input_dim=1, hidden_dim=50, output_dim=1, num_hidden_layers=2):
-        super(FullyConnectedNet, self).__init__()
-        layers = [nn.Linear(input_dim, hidden_dim), nn.Tanh()]
-        for _ in range(num_hidden_layers):
-            layers += [nn.Linear(hidden_dim, hidden_dim), nn.Tanh()]
-        layers.append(nn.Linear(hidden_dim, output_dim))
-        self.net = nn.Sequential(*layers)
+class NN(nn.Module):
+    def __init__(self, n_input, n_hidden, n_layers, n_output):
+        super().__init__()
+        self.fcs = nn.Sequential(*[
+            nn.Linear(n_input, n_hidden),
+            nn.Tanh(),
+        ])
+        self.fch = nn.Sequential(*[
+            nn.Sequential(*[
+                nn.Linear(n_hidden, n_hidden),
+                nn.Tanh(),
+            ]) for _ in range(n_layers - 1)
+        ])
+        self.fce = nn.Linear(n_hidden, n_output)
 
     def forward(self, x):
-        return self.net(x)
+        # x = (x-x.mean())/x.std()
+        x = self.fcs(x)
+        x = self.fch(x)
+        x = self.fce(x)
+        return x
+
+
+class NN_SC1(nn.Module):
+    def __init__(self, n_input, n_output, n_hidden, n_layers):
+        super().__init__()
+        self.alpha = nn.parameter.Parameter(data=torch.ones(1))
+        self.fcs = nn.Sequential(*[
+            nn.Linear(n_input, n_hidden),
+            nn.Tanh(),
+        ])
+        self.fch = nn.Sequential(*[
+            nn.Sequential(*[
+                nn.Linear(n_hidden, n_hidden),
+                nn.Tanh(),
+            ]) for _ in range(n_layers - 1)
+        ])
+        self.fce = nn.Linear(n_hidden, n_output)
+
+    def forward(self, x):
+        # x = (x-mean)/std
+        x = self.alpha*x
+        x = torch.exp(x)
+        x = self.fcs(x)
+        x = self.fch(x)
+        x = self.fce(x)
+        return x
+
+
+class NN_SC2(nn.Module):
+    def __init__(self, n_input, n_output, n_hidden, n_layers):
+        super().__init__()
+        self.alpha = nn.parameter.Parameter(data=-1*torch.ones(1))
+        self.fcs = nn.Sequential(*[
+            nn.Linear(n_input, n_hidden),
+            nn.Tanh(),
+        ])
+        self.fch = nn.Sequential(*[
+            nn.Sequential(*[
+                nn.Linear(n_hidden, n_hidden),
+                nn.Tanh(),
+            ]) for _ in range(n_layers - 1)
+        ])
+        self.fce = nn.Linear(n_hidden, n_output)
+
+    def forward(self, x):
+        # x = (x-mean)/std
+        x = self.alpha*x
+        x = torch.exp(x)
+        x = self.fcs(x)
+        x = self.fch(x)
+        x = self.fce(x)
+        return x
