@@ -19,5 +19,5 @@ class NeumannCondition(ConditionBase):
         return torch.mean((d_phi - target_tensor) ** 2)
 
 
-def derivative_ic_loss(model, ic_points, target=1 / np.pi):
+def derivative_ic_loss(model, ic_points, target=-1 / np.pi):
     return NeumannCondition(target).compute(model, ic_points)
