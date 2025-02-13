@@ -1,7 +1,7 @@
-# src/models/poisson_net.py
-from src.models.base_model import FullyConnectedNet
+# src/models/poisson1d.py
+from src.models.base_model import NN
 
 
-class PoissonPINN(FullyConnectedNet):
+class PoissonPINN(NN):
     def __init__(self):
-        super(PoissonPINN, self).__init__(input_dim=1, hidden_dim=10, output_dim=1, num_hidden_layers=2)
+        super(PoissonPINN, self).__init__(n_input=1, n_hidden=10, n_layers=2, n_output=1)
