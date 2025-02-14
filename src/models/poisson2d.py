@@ -1,17 +1,7 @@
-import torch
-import torch.nn as nn
-from src.models.base_model import FullyConnectedNet
+# src/models/poisson2d.py
+from src.models.base_model import NN
 
 
-class Poisson2DPINN(FullyConnectedNet):
+class Poisson2DPINN(NN):
     def __init__(self):
-        super(Poisson2DPINN, self).__init__(input_dim=2, hidden_dim=50, num_hidden_layers=3, output_dim=1)
-        # layers = [nn.Linear(input_dim, hidden_dim), nn.Tanh()]
-        # for _ in range(num_hidden_layers):
-        #     layers.append(nn.Linear(hidden_dim, hidden_dim))
-        #     layers.append(nn.Tanh())
-        # layers.append(nn.Linear(hidden_dim, output_dim))
-        # self.net = nn.Sequential(*layers)
-
-    # def forward(self, x):
-    #     return self.net(x)
+        super(Poisson2DPINN, self).__init__(n_input=2, n_hidden=50, n_layers=4, n_output=1)
