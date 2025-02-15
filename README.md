@@ -11,11 +11,11 @@ This modular design facilitates rapid experimentation with various physical mode
 
 ### Poisson 1D
 We solve:
-$$ \phi''(x) - \sin(\pi x) = 0, \quad x \in [0,1], $$
+$$\phi''(x) - \sin(\pi x) = 0, \quad x \in [0,1],$$
 with Dirichlet boundary conditions:
-$$ \phi(0) = \phi(1) = 0. $$
+$$\phi(0) = \phi(1) = 0.$$
 Analytic Solution:
-$$ \phi(x) = -\frac{1}{\pi^2}\sin(\pi x). $$
+$$\phi(x) = -\frac{1}{\pi^2}\sin(\pi x).$$
 
 ### Poisson 2D
 We solve a 2D Poisson problem:
