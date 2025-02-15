@@ -1,23 +1,35 @@
 # src/losses/ic_loss.py
 import numpy as np
 import torch
-from torch import nn
 
-from src.losses.base_loss import ConditionBase
-
-
-class NeumannCondition(ConditionBase):
-    """Neumann boundary condition (first derivative constraint): φ'(x) = target."""
-    def __init__(self, target: float = 0.0):
-        self.target = target
-
-    def compute(self, model: nn.Module, points: torch.Tensor) -> torch.Tensor:
-        points = points.clone().detach().requires_grad_(True)
-        phi = model(points)
-        d_phi = torch.autograd.grad(phi, points, grad_outputs=torch.ones_like(phi), create_graph=True)[0]
-        target_tensor = torch.full_like(d_phi, self.target, dtype=torch.float32, device=points.device)
-        return torch.mean((d_phi - target_tensor) ** 2)
+from src.losses.conditions import NeumannCondition
 
 
 def derivative_ic_loss(model, ic_points, target=-1 / np.pi):
     return NeumannCondition(target).compute(model, ic_points)
+
+
+def wave_ic_loss(model, ic_points):
+    """
+    Enforces the initial conditions for the 1D wave equation:
+        u(x,0) = sin(pi*x)   and   u_t(x,0) = 0.
+    Args:
+        model: Model
+        ic_points: Tensor of shape (N_ic,2) with t=0.
+    """
+    # Enforce u(x,0) = sin(pi*x)
+    u_ic = model(ic_points)
+    x = ic_points[:, 0:1]
+    u_target = torch.sin(np.pi * x)
+    loss_u = torch.mean((u_ic - u_target) ** 2)
+
+    # Enforce u_t(x,0) = 0
+    ic_points_grad = ic_points.clone().detach().requires_grad_(True)
+    u_ic_grad = model(ic_points_grad)
+    grad_u = torch.autograd.grad(u_ic_grad, ic_points_grad,
+                                 grad_outputs=torch.ones_like(u_ic_grad),
+                                 create_graph=True)[0]
+    u_t = grad_u[:, 1:2]
+    loss_ut = torch.mean(u_t ** 2)
+
+    return loss_u + loss_ut
