@@ -1,6 +1,7 @@
 # src/residuals/poisson2d.py
-import torch
 import numpy as np
+import torch
+
 from src.core.base_residual import ResidualBase
 from src.models.poisson2d import Poisson2DPINN
 

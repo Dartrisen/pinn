@@ -12,17 +12,24 @@ from src.utils.data_generation import (
     generate_2d_boundary_points,
 )
 
-# CONSTANTS
-x_min, x_max, y_min, y_max = 0.0, 1.0, 0.0, 1.0  # Domain: [0,1] x [0,1]
+# =============================================================================
+# Hyperparameters & Domain Settings
+# =============================================================================
+DEVICE = torch.device("cpu")
+X_MIN, X_MAX, Y_MIN, Y_MAX = 0.0, 1.0, 0.0, 1.0  # Domain: [0,1] x [0,1]
 NUM_COLL = 2000
+
 EPOCHS = 1000
 LEARNING_RATE = 1e-3
-LOSS_WEIGHTS = {"pde": 2*0.5, "bc": 2*0.5, "ic": 2*0.5}
+LOSS_WEIGHT_PDE = 1.0
+LOSS_WEIGHT_BC = 1.0
+LOSS_WEIGHT_IC = 1.0
+LOSS_WEIGHTS = {"pde": LOSS_WEIGHT_PDE, "bc": LOSS_WEIGHT_BC, "ic": LOSS_WEIGHT_IC}
 
 
 def main() -> None:
-    x_coll_tensor = generate_2d_collocation_points(x_min, x_max, y_min, y_max, NUM_COLL)
-    x_bc_tensor = generate_2d_boundary_points(x_min, x_max, y_min, y_max, num_points_per_edge=100)
+    x_coll_tensor = generate_2d_collocation_points(X_MIN, X_MAX, Y_MIN, Y_MAX, NUM_COLL).to(DEVICE)
+    x_bc_tensor = generate_2d_boundary_points(X_MIN, X_MAX, Y_MIN, Y_MAX, num_points_per_edge=100).to(DEVICE)
 
     use_deriv_constraint = False
     ic_loss_func = None
@@ -32,7 +39,8 @@ def main() -> None:
         ic_loss_func = derivative_ic_loss
         ic_points_tensor = torch.tensor([[0.0, 0.0]], dtype=torch.float32)
 
-    model = Poisson2DPINN()
+    model = Poisson2DPINN().to(DEVICE)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     solver = GenericPINNSolver(
         model=model,
@@ -42,20 +50,20 @@ def main() -> None:
         collocation_points=x_coll_tensor,
         bc_points=x_bc_tensor,
         ic_points=ic_points_tensor,
-        device=torch.device("cpu")
+        device=DEVICE
     )
-
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     loss_history = solver.train(EPOCHS, optimizer, LOSS_WEIGHTS, log_interval=100)
 
     n_points = 50
-    x_vals = np.linspace(x_min, x_max, n_points)
-    y_vals = np.linspace(y_min, y_max, n_points)
+    x_vals = np.linspace(X_MIN, X_MAX, n_points)
+    y_vals = np.linspace(Y_MIN, Y_MAX, n_points)
     X, Y = np.meshgrid(x_vals, y_vals)
     grid_points = np.vstack([X.flatten(), Y.flatten()]).T
 
-    u_pred = solver.predict(grid_points).reshape(n_points, n_points)
+    model.eval()
+    with torch.no_grad():
+        u_pred = solver.predict(grid_points).reshape(n_points, n_points)
 
     U_analytic = 1 / (2 * np.pi**2) * np.sin(np.pi * X) * np.sin(np.pi * Y)
 

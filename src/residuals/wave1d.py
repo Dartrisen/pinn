@@ -1,4 +1,4 @@
-# src/residuals/wave.py
+# src/residuals/wave1d.py
 import torch
 
 from src.core.base_residual import ResidualBase
