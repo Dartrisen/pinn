@@ -71,6 +71,9 @@ python examples/wave1d.py
 **Poisson 2D**
 <img src="https://github.com/Dartrisen/pinn/blob/main/results/poisson2d.png" width="100%" height="100%">
 
+**Wave 1D**
+<img src="https://github.com/Dartrisen/pinn/blob/main/results/wave1d.png" width="100%" height="100%">
+
 ## Extending the Framework
 
 To add new PDEs:
