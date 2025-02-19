@@ -28,6 +28,9 @@ LOSS_WEIGHTS = {"pde": LOSS_WEIGHT_PDE, "bc": LOSS_WEIGHT_BC, "ic": LOSS_WEIGHT_
 
 
 def main() -> None:
+    # =============================================================================
+    # Generate Training Data (using your existing utils)
+    # =============================================================================
     x_coll_tensor = generate_2d_collocation_points(X_MIN, X_MAX, Y_MIN, Y_MAX, NUM_COLL).to(DEVICE)
     x_bc_tensor = generate_2d_boundary_points(X_MIN, X_MAX, Y_MIN, Y_MAX, num_points_per_edge=100).to(DEVICE)
 
@@ -39,6 +42,9 @@ def main() -> None:
         ic_loss_func = derivative_ic_loss
         ic_points_tensor = torch.tensor([[0.0, 0.0]], dtype=torch.float32)
 
+    # =============================================================================
+    # Instantiate Model & Solver
+    # =============================================================================
     model = Poisson2DPINN().to(DEVICE)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
@@ -55,6 +61,9 @@ def main() -> None:
 
     loss_history = solver.train(EPOCHS, optimizer, LOSS_WEIGHTS, log_interval=100)
 
+    # =============================================================================
+    # Evaluation and Plotting
+    # =============================================================================
     n_points = 50
     x_vals = np.linspace(X_MIN, X_MAX, n_points)
     y_vals = np.linspace(Y_MIN, Y_MAX, n_points)
