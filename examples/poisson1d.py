@@ -63,6 +63,7 @@ def main() -> None:
     )
 
     loss_history = solver.train(EPOCHS, optimizer, LOSS_WEIGHTS, log_interval=50)
+
     # =============================================================================
     # Evaluation and Plotting
     # =============================================================================
